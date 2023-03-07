@@ -1,0 +1,135 @@
+@using Oqtane.Modules.Controls
+@using YogIT.LargeAzFileUpload.Services
+@using YogIT.LargeAzFileUpload.Shared.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using System.IO;
+
+@namespace YogIT.LargeAzFileUpload
+@inherits ModuleBase
+@inject ILargeAzFileUploadService LargeAzFileUploadService
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<Index> Localizer
+@inject ISettingService SettingService
+
+<form @ref="form" class="@(validated ? " was-validated" : "needs-validation" )" novalidate>
+    @if (_options == null)
+    {
+        <div class="alert alert-info" role="alert">@Localizer["Message.ConfigureModule"]</div>
+    }
+    else
+    {
+        if (_containers == null)
+        {
+            <div>Loading...</div>
+        }
+        else
+        {
+            <div class="container">
+                <div class="row mb-3">
+                    <Label Class="col-lg-2" For="containerSelect" HelpText="Select the portal" ResourceKey="Name">Select Portal: </Label>
+                    <div class="col-lg-10">
+                        <select id="containerSelect" @bind="_selectedContainer" class="form-select w-75">
+                            @foreach (var container in _containers)
+                            {
+                                <option value="@container">@container</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <Label Class="col-lg-2 mb-2" For="name" HelpText="Select the file you would like to upload" ResourceKey="File">Select File: </Label>
+                    <div class="col-lg-10">
+                        <InputFile @key=(_inputFileId) class="form-control" multiple OnChange="@GetFileList" />
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-success" @onclick="UploadFiles">@Localizer["Upload"]</button>
+            if (_uploading)
+            {
+                <div>Uploading...</div>
+
+                <!-- LOADING DOTS... -->
+                <div class="spinner-box">
+                    <div class="pulse-container">
+                        <div class="pulse-bubble pulse-bubble-1"></div>
+                        <div class="pulse-bubble pulse-bubble-2"></div>
+                        <div class="pulse-bubble pulse-bubble-3"></div>
+                    </div>
+                </div>
+            }
+        }
+    }
+</form>
+
+@code {
+
+    private ElementReference form;
+    private bool validated = false;
+    private List<string> _containers;
+    private string _selectedContainer;
+    private AzureStorageConfig _options;
+    private bool _uploading = false;
+    private List<IBrowserFile> _files;
+    private string _inputFileId = Guid.NewGuid().ToString();
+
+    public override List<Resource> Resources => new List<Resource>()
+    {
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // get the containers
+            if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "StorageName", "")))
+            {
+                _options = new AzureStorageConfig();
+                _options.AccountName = SettingService.GetSetting(ModuleState.Settings, "StorageName", "");
+                _options.AccountKey = SettingService.GetSetting(ModuleState.Settings, "StorageKey", "");
+                _containers = await LargeAzFileUploadService.GetContainersAsync(_options, SettingService.GetSetting(ModuleState.Settings, "DefaultPath", ""), 100);
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading: {Error}", ex.Message);
+            AddModuleMessage(Localizer["Message.LoadError"], MessageType.Error);
+        }
+    }
+
+    private void GetFileList(InputFileChangeEventArgs e)
+    {
+        _files = e.GetMultipleFiles().ToList();
+    }
+
+    private async Task UploadFiles()
+    {
+        try
+        {
+            validated = true;
+            _uploading = true;
+            var interop = new Oqtane.UI.Interop(JSRuntime);
+            if (await interop.FormValid(form))
+            {
+                foreach (var file in _files)
+                {
+                    await LargeAzFileUploadService.UploadFileToStorage(_options, file.OpenReadStream(2147463648), _selectedContainer, SettingService.GetSetting(ModuleState.Settings, "DefaultPath", ""), file.Name);
+                }
+                _inputFileId = Guid.NewGuid().ToString();
+                await logger.LogInformation("Uploaded File");
+                AddModuleMessage(Localizer["Message.UploadComplete"], MessageType.Success);
+            }
+            else
+            {
+                AddModuleMessage(Localizer["Message.UploadValidation"], MessageType.Warning);
+            }
+            _uploading = false;
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Uploading File: {Error}", ex.Message);
+            AddModuleMessage(Localizer["Message.UploadError"], MessageType.Error);
+        }
+    }
+}

@@ -1,0 +1,64 @@
+@namespace YogIT.LargeAzFileUpload
+@inherits ModuleBase
+@inject ISettingService SettingService
+@inject IStringLocalizer<Settings> Localizer
+
+<div class="container">
+    <div class="row mb-1 align-items-center">
+        <Label Class="col-sm-3" For="storageName" HelpText="Enter the Azure Storage Name" ResourceKey="StorageName">Storage Name: </Label>
+        <div class="col-sm-9">
+            <input id="storageName" type="text" class="form-control" @bind="@_storageName" />
+        </div>
+    </div>
+    <div class="row mb-1 align-items-center">
+        <Label Class="col-sm-3" For="storageKey" HelpText="Enter the Azure Storage Name" ResourceKey="StorageKey">Storage Key: </Label>
+        <div class="col-sm-9">
+            <input id="storageKey" type="text" class="form-control" @bind="@_storageKey" />
+        </div>
+    </div>
+    <div class="row mb-1 align-items-center">
+        <Label Class="col-sm-3" For="defaultPath" HelpText="Default Path in Container. Default is blank." ResourceKey="StorageKey">Default Path: </Label>
+        <div class="col-sm-9">
+            <input id="defaultPath" type="text" class="form-control" @bind="@_defaultPath" />
+        </div>
+    </div>
+</div>
+
+@code {
+    public override string Title => "LargeAzFileUpload Settings";
+
+    string _storageName;
+    string _storageKey;
+    string _defaultPath;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
+            _storageName = SettingService.GetSetting(settings, "StorageName", "");
+            _storageKey = SettingService.GetSetting(settings, "StorageKey", "");
+            _defaultPath = SettingService.GetSetting(settings, "DefaultPath", "");
+        }
+        catch (Exception ex)
+        {
+            ModuleInstance.AddModuleMessage(ex.Message, MessageType.Error);
+        }
+    }
+
+    public async Task UpdateSettings()
+    {
+        try
+        {
+            Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
+            SettingService.SetSetting(settings, "StorageName", _storageName);
+            SettingService.SetSetting(settings, "StorageKey", _storageKey);
+            SettingService.SetSetting(settings, "DefaultPath", _defaultPath);
+            await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
+        }
+        catch (Exception ex)
+        {
+            ModuleInstance.AddModuleMessage(ex.Message, MessageType.Error);
+        }
+    }
+}

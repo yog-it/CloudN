@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>YogIT.LargeAzFileUpload</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <authors>YogIT</authors>
     <owners>YogIT</owners>
     <title>LargeAzFileUpload</title>
@@ -16,19 +16,19 @@
     <releaseNotes></releaseNotes>
     <summary></summary>
     <dependencies>
-      <dependency id="Oqtane.Framework" version="3.3.1" />
+      <dependency id="Oqtane.Framework" version="4.0.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="..\Client\bin\Release\net6.0\YogIT.LargeAzFileUpload.Client.Oqtane.dll" target="lib\net6.0" />
-	  <file src="..\Client\bin\Release\net6.0\YogIT.LargeAzFileUpload.Client.Oqtane.pdb" target="lib\net6.0" />
-	  <file src="..\Client\bin\Release\net6.0\Azure.Core.dll" target="lib\net6.0" />
-	  <file src="..\Client\bin\Release\net6.0\Azure.Storage.Blobs.dll" target="lib\net6.0" />
-	  <file src="..\Client\bin\Release\net6.0\Azure.Storage.Common.dll" target="lib\net6.0" /> 
-    <file src="..\Server\bin\Release\net6.0\YogIT.LargeAzFileUpload.Server.Oqtane.dll" target="lib\net6.0" /> 
-    <file src="..\Server\bin\Release\net6.0\YogIT.LargeAzFileUpload.Server.Oqtane.pdb" target="lib\net6.0" /> 
-    <file src="..\Shared\bin\Release\net6.0\YogIT.LargeAzFileUpload.Shared.Oqtane.dll" target="lib\net6.0" /> 
-    <file src="..\Shared\bin\Release\net6.0\YogIT.LargeAzFileUpload.Shared.Oqtane.pdb" target="lib\net6.0" />
+    <file src="..\Client\bin\Release\net7.0\YogIT.LargeAzFileUpload.Client.Oqtane.dll" target="lib\net7.0" />
+	  <file src="..\Client\bin\Release\net7.0\YogIT.LargeAzFileUpload.Client.Oqtane.pdb" target="lib\net7.0" />
+	  <file src="..\Client\bin\Release\net7.0\Azure.Core.dll" target="lib\net7.0" />
+	  <file src="..\Client\bin\Release\net7.0\Azure.Storage.Blobs.dll" target="lib\net7.0" />
+	  <file src="..\Client\bin\Release\net7.0\Azure.Storage.Common.dll" target="lib\net7.0" /> 
+    <file src="..\Server\bin\Release\net7.0\YogIT.LargeAzFileUpload.Server.Oqtane.dll" target="lib\net7.0" /> 
+    <file src="..\Server\bin\Release\net7.0\YogIT.LargeAzFileUpload.Server.Oqtane.pdb" target="lib\net7.0" /> 
+    <file src="..\Shared\bin\Release\net7.0\YogIT.LargeAzFileUpload.Shared.Oqtane.dll" target="lib\net7.0" /> 
+    <file src="..\Shared\bin\Release\net7.0\YogIT.LargeAzFileUpload.Shared.Oqtane.pdb" target="lib\net7.0" />
 	  <file src="..\Server\wwwroot\**\*.*" target="wwwroot" /> 
     <file src="icon.png" target="" />
   </files>

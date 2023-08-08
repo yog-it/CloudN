@@ -8,10 +8,10 @@ namespace YogIT.LargeAzFileUpload
         public ModuleDefinition ModuleDefinition => new ModuleDefinition
         {
             Name = "LargeAzFileUpload",
-            Description = "LargeAzFileUpload",
-            Version = "1.0.0",
+            Description = "Large Azure File Uploader",
+            Version = "1.0.1",
             ServerManagerType = "YogIT.LargeAzFileUpload.Manager.LargeAzFileUploadManager, YogIT.LargeAzFileUpload.Server.Oqtane",
-            ReleaseVersions = "1.0.0",
+            ReleaseVersions = "1.0.1",
             Dependencies = "YogIT.LargeAzFileUpload.Shared.Oqtane",
             PackageName = "YogIT.LargeAzFileUpload" 
         };

@@ -10,7 +10,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YogIT.LargeAzFileUpload.Sha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YogIT.LargeAzFileUpload.Package", "Package\YogIT.LargeAzFileUpload.Package.csproj", "{C5CE512D-CBB7-4545-AF0F-9B6591A0C3A7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oqtane.Server", "..\oqtane.framework-3.3.1\Oqtane.Server\Oqtane.Server.csproj", "{51FADA5B-4B7E-43CF-A5B5-26CD80FCB8CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oqtane.Server", "..\oqtane.framework\Oqtane.Server\Oqtane.Server.csproj", "{F9C43C46-F3EA-4E17-B2D2-F6B360DD68CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +34,9 @@ Global
 		{C5CE512D-CBB7-4545-AF0F-9B6591A0C3A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5CE512D-CBB7-4545-AF0F-9B6591A0C3A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5CE512D-CBB7-4545-AF0F-9B6591A0C3A7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{51FADA5B-4B7E-43CF-A5B5-26CD80FCB8CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{51FADA5B-4B7E-43CF-A5B5-26CD80FCB8CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{51FADA5B-4B7E-43CF-A5B5-26CD80FCB8CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{51FADA5B-4B7E-43CF-A5B5-26CD80FCB8CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9C43C46-F3EA-4E17-B2D2-F6B360DD68CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9C43C46-F3EA-4E17-B2D2-F6B360DD68CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9C43C46-F3EA-4E17-B2D2-F6B360DD68CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

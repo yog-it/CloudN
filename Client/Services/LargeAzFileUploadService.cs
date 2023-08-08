@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
@@ -12,9 +11,7 @@ using Oqtane.Services;
 using Oqtane.Shared;
 using YogIT.LargeAzFileUpload.Shared.Models;
 using Azure.Storage.Blobs.Models;
-using Azure;
 using Azure.Storage.Blobs.Specialized;
-using System.Net.NetworkInformation;
 
 namespace YogIT.LargeAzFileUpload.Services
 {

@@ -1,18 +1,18 @@
+@using Azure.Storage.Blobs;
+@using Azure.Storage.Blobs.Models;
 @using Oqtane.Modules.Controls
-@using YogIT.LargeAzFileUpload.Services
 @using YogIT.LargeAzFileUpload.Shared.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using System.IO;
 
 @namespace YogIT.LargeAzFileUpload
 @inherits ModuleBase
-@inject ILargeAzFileUploadService LargeAzFileUploadService
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<Index> Localizer
 @inject ISettingService SettingService
 
 <form @ref="form" class="@(validated ? " was-validated" : "needs-validation" )" novalidate>
-    @if (_options == null)
+    @if (string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "StorageName", "")))
     {
         <div class="alert alert-info" role="alert">@Localizer["Message.ConfigureModule"]</div>
     }
@@ -26,7 +26,7 @@
         {
             <div class="container">
                 <div class="row mb-3">
-                    <Label Class="col-lg-2" For="containerSelect" HelpText="Select the portal" ResourceKey="Name">Select Portal: </Label>
+                    <Label Class="col-lg-2" For="containerSelect" HelpText="Please select the container in the Azure Storage Account you would like to upload to." ResourceKey="SelectContainer">Select Container: </Label>
                     <div class="col-lg-10">
                         <select id="containerSelect" @bind="_selectedContainer" class="form-select w-75">
                             @foreach (var container in _containers)
@@ -47,14 +47,8 @@
             if (_uploading)
             {
                 <div>Uploading...</div>
-
-                <!-- LOADING DOTS... -->
-                <div class="spinner-box">
-                    <div class="pulse-container">
-                        <div class="pulse-bubble pulse-bubble-1"></div>
-                        <div class="pulse-bubble pulse-bubble-2"></div>
-                        <div class="pulse-bubble pulse-bubble-3"></div>
-                    </div>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: @uploadProgress%"></div>
                 </div>
             }
         }
@@ -65,12 +59,13 @@
 
     private ElementReference form;
     private bool validated = false;
-    private List<string> _containers;
+    private List<string> _containers = new List<string>();
     private string _selectedContainer;
-    private AzureStorageConfig _options;
     private bool _uploading = false;
     private List<IBrowserFile> _files;
     private string _inputFileId = Guid.NewGuid().ToString();
+    private int uploadProgress;
+    private BlobServiceClient blobServiceClient;
 
     public override List<Resource> Resources => new List<Resource>()
     {
@@ -85,11 +80,12 @@
             // get the containers
             if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "StorageName", "")))
             {
-                _options = new AzureStorageConfig();
-                _options.AccountName = SettingService.GetSetting(ModuleState.Settings, "StorageName", "");
-                _options.AccountKey = SettingService.GetSetting(ModuleState.Settings, "StorageKey", "");
-                _containers = await LargeAzFileUploadService.GetContainersAsync(_options, SettingService.GetSetting(ModuleState.Settings, "DefaultPath", ""), 100);
+                string connectionString = $"DefaultEndpointsProtocol=https;AccountName={SettingService.GetSetting(ModuleState.Settings, "StorageName", "")};AccountKey={SettingService.GetSetting(ModuleState.Settings, "StorageKey", "")};EndpointSuffix=core.windows.net";
+                blobServiceClient = new BlobServiceClient(connectionString);
+                await LoadContainersAsync();
             }
+
+
         }
         catch (Exception ex)
         {
@@ -103,6 +99,14 @@
         _files = e.GetMultipleFiles().ToList();
     }
 
+    private async Task LoadContainersAsync()
+    {
+        await foreach (BlobContainerItem containerItem in blobServiceClient.GetBlobContainersAsync())
+        {
+            _containers.Add(containerItem.Name);
+        }
+    }
+
     private async Task UploadFiles()
     {
         try
@@ -114,7 +118,22 @@
             {
                 foreach (var file in _files)
                 {
-                    await LargeAzFileUploadService.UploadFileToStorage(_options, file.OpenReadStream(2147463648), _selectedContainer, SettingService.GetSetting(ModuleState.Settings, "DefaultPath", ""), file.Name);
+
+                    BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(_selectedContainer);
+                    BlobClient blobClient = containerClient.GetBlobClient(file.Name);
+
+                    using (var stream = file.OpenReadStream(2147463648))
+                    {
+                        var progressHandler = new Progress<long>(progress =>
+                        {
+                            uploadProgress = (int)((progress * 100) / stream.Length);
+                            StateHasChanged();
+                        });
+                        await blobClient.UploadAsync(stream, new Azure.Storage.Blobs.Models.BlobUploadOptions
+                        {
+                            ProgressHandler = progressHandler
+                        });
+                    }
                 }
                 _inputFileId = Guid.NewGuid().ToString();
                 await logger.LogInformation("Uploaded File");

@@ -25,17 +25,20 @@
         else
         {
             <div class="container">
-                <div class="row mb-3">
-                    <Label Class="col-lg-2" For="containerSelect" HelpText="Please select the container in the Azure Storage Account you would like to upload to." ResourceKey="SelectContainer">Select Container: </Label>
-                    <div class="col-lg-10">
-                        <select id="containerSelect" @bind="_selectedContainer" class="form-select w-75">
-                            @foreach (var container in _containers)
-                            {
-                                <option value="@container">@container</option>
-                            }
-                        </select>
-                    </div>
-                </div>
+                @if (_canChangeContainer)
+                {
+                    <div class="row mb-3">
+                        <Label Class="col-lg-2" For="containerSelect" HelpText="Please select the container in the Azure Storage Account you would like to upload to." ResourceKey="SelectContainer">Select Container: </Label>
+                        <div class="col-lg-10">
+                            <select id="containerSelect" @bind="_selectedContainer" class="form-select w-75">
+                                @foreach (var container in _containers)
+                                {
+                                    <option value="@container">@container</option>
+                                }
+                            </select>
+                        </div>
+                    </div>                    
+                }
                 <div class="row mb-3">
                     <Label Class="col-lg-2 mb-2" For="name" HelpText="Select the file you would like to upload" ResourceKey="File">Select File: </Label>
                     <div class="col-lg-10">
@@ -66,6 +69,7 @@
     private string _inputFileId = Guid.NewGuid().ToString();
     private int uploadProgress;
     private BlobServiceClient blobServiceClient;
+    private bool _canChangeContainer = false;
 
     public override List<Resource> Resources => new List<Resource>()
     {
@@ -84,8 +88,14 @@
                 blobServiceClient = new BlobServiceClient(connectionString);
                 await LoadContainersAsync();
             }
-
-
+            if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "AllowContainerChange", "")))
+            {
+                _canChangeContainer = bool.Parse(SettingService.GetSetting(ModuleState.Settings, "AllowContainerChange", ""));
+            }
+            if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "DefaultContainer", "")))
+            {
+                _selectedContainer = SettingService.GetSetting(ModuleState.Settings, "DefaultContainer", "");
+            }
         }
         catch (Exception ex)
         {

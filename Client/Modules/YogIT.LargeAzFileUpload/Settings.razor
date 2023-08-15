@@ -1,5 +1,7 @@
 @namespace YogIT.LargeAzFileUpload
 @inherits ModuleBase
+@using Azure.Storage.Blobs;
+@using Azure.Storage.Blobs.Models;
 @inject ISettingService SettingService
 @inject IStringLocalizer<Settings> Localizer
 
@@ -16,6 +18,23 @@
             <input id="storageKey" type="text" class="form-control" @bind="@_storageKey" />
         </div>
     </div>
+    @if (!string.IsNullOrEmpty(_storageKey) && !string.IsNullOrEmpty(_storageKey))
+    {
+        <div class="row mb-1 align-items-center">
+            <Label Class="col-sm-3" For="containerSelect" HelpText="Please select the container in the Azure Storage Account that you would like to be the default container used." ResourceKey="SelectContainer">Default Container: </Label>
+            <div class="col-sm-9 input-group">
+                <select id="containerSelect" @bind="@_defaultContainer" class="form-select w-50">
+                    @foreach (var container in _containers)
+                    {
+                        <option value="@container">@container</option>
+                    }
+                </select>
+                <div class="input-group-text">
+                    Users can change containers&nbsp;<input class="form-check-input mt-0" type="checkbox" value="" aria-label="Can users change from the defult container?" @bind="@_allowContainerChange">
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -23,6 +42,11 @@
 
     string _storageName;
     string _storageKey;
+    string _defaultContainer;
+    bool _allowContainerChange;
+    List<string> _containers = new List<string>();
+    private BlobServiceClient blobServiceClient;
+    private bool isContainerListLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -31,10 +55,36 @@
             Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
             _storageName = SettingService.GetSetting(settings, "StorageName", "");
             _storageKey = SettingService.GetSetting(settings, "StorageKey", "");
+            _defaultContainer = SettingService.GetSetting(settings, "DefaultContainer", "");
+            bool.TryParse(SettingService.GetSetting(settings, "AllowContainerChange", ""), out _allowContainerChange);
+            await LoadContainersAsync();
+
         }
         catch (Exception ex)
         {
             ModuleInstance.AddModuleMessage(ex.Message, MessageType.Error);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await LoadContainersAsync();
+    }
+
+    private async Task LoadContainersAsync()
+    {
+
+        // get the containers
+        if (!string.IsNullOrEmpty(_storageKey) && !string.IsNullOrEmpty(_storageKey) && !isContainerListLoaded)
+        {
+            string connectionString = $"DefaultEndpointsProtocol=https;AccountName={_storageName};AccountKey={_storageKey};EndpointSuffix=core.windows.net";
+            blobServiceClient = new BlobServiceClient(connectionString);
+            await foreach (BlobContainerItem containerItem in blobServiceClient.GetBlobContainersAsync())
+            {
+                _containers.Add(containerItem.Name);
+            }
+            StateHasChanged();
+            isContainerListLoaded = true;
         }
     }
 
@@ -45,6 +95,8 @@
             Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
             SettingService.SetSetting(settings, "StorageName", _storageName);
             SettingService.SetSetting(settings, "StorageKey", _storageKey);
+            SettingService.SetSetting(settings, "DefaultContainer", _defaultContainer);
+            SettingService.SetSetting(settings, "AllowContainerChange", _allowContainerChange.ToString());
             await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
         }
         catch (Exception ex)

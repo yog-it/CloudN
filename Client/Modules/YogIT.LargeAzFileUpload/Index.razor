@@ -2,6 +2,7 @@
 @using Azure.Storage.Blobs.Models;
 @using Oqtane.Modules.Controls
 @using YogIT.LargeAzFileUpload.Shared.Models
+@using YogIT.LargeAzFileUpload.Components
 @using Microsoft.AspNetCore.Components.Forms
 @using System.IO;
 
@@ -51,8 +52,13 @@
             {
                 <div>Uploading...</div>
                 <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: @uploadProgress%"></div>
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: @_uploadProgress%"></div>
                 </div>
+            }
+            if (!string.IsNullOrEmpty(_fileUrl))
+            {
+                <h3>Last Uploaded</h3>
+                <div class="card-title text-truncate"><CopyToClipboard Text="@_fileUrl" IconName="clipboard" ClientId="@($"copied{@_fileUrl}")" /></div>
             }
         }
     }
@@ -67,8 +73,9 @@
     private bool _uploading = false;
     private List<IBrowserFile> _files;
     private string _inputFileId = Guid.NewGuid().ToString();
-    private int uploadProgress;
-    private BlobServiceClient blobServiceClient;
+    private int _uploadProgress;
+    private BlobServiceClient _blobServiceClient;
+    private string _fileUrl;
     private bool _canChangeContainer = false;
 
     public override List<Resource> Resources => new List<Resource>()
@@ -85,7 +92,7 @@
             if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "StorageName", "")))
             {
                 string connectionString = $"DefaultEndpointsProtocol=https;AccountName={SettingService.GetSetting(ModuleState.Settings, "StorageName", "")};AccountKey={SettingService.GetSetting(ModuleState.Settings, "StorageKey", "")};EndpointSuffix=core.windows.net";
-                blobServiceClient = new BlobServiceClient(connectionString);
+                _blobServiceClient = new BlobServiceClient(connectionString);
                 await LoadContainersAsync();
             }
             if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "AllowContainerChange", "")))
@@ -111,7 +118,7 @@
 
     private async Task LoadContainersAsync()
     {
-        await foreach (BlobContainerItem containerItem in blobServiceClient.GetBlobContainersAsync())
+        await foreach (BlobContainerItem containerItem in _blobServiceClient.GetBlobContainersAsync())
         {
             _containers.Add(containerItem.Name);
         }
@@ -129,20 +136,21 @@
                 foreach (var file in _files)
                 {
 
-                    BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(_selectedContainer);
+                    BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_selectedContainer);
                     BlobClient blobClient = containerClient.GetBlobClient(file.Name);
 
                     using (var stream = file.OpenReadStream(2147463648))
                     {
                         var progressHandler = new Progress<long>(progress =>
                         {
-                            uploadProgress = (int)((progress * 100) / stream.Length);
+                            _uploadProgress = (int)((progress * 100) / stream.Length);
                             StateHasChanged();
                         });
                         await blobClient.UploadAsync(stream, new Azure.Storage.Blobs.Models.BlobUploadOptions
                         {
                             ProgressHandler = progressHandler
                         });
+                        _fileUrl = blobClient.Uri.AbsoluteUri;
                     }
                 }
                 _inputFileId = Guid.NewGuid().ToString();

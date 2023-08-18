@@ -1,0 +1,8 @@
+
+.copied {
+    z-index: -1;
+}
+
+    .copied.show {
+        z-index: 1070;
+    }

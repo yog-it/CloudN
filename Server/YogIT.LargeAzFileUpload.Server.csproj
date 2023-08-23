@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <Product>YogIT.LargeAzFileUpload</Product>
     <Authors>YogIT</Authors>
     <Company>YogIT</Company>

@@ -152,9 +152,11 @@
                         });
                         _fileUrl = blobClient.Uri.AbsoluteUri;
                     }
+
+                    await logger.LogInformation($"Uploaded File {file.Name} to {blobClient.Uri.AbsoluteUri} ({file.Size:N0}) bytes");
+
                 }
                 _inputFileId = Guid.NewGuid().ToString();
-                await logger.LogInformation("Uploaded File");
                 AddModuleMessage(Localizer["Message.UploadComplete"], MessageType.Success);
             }
             else

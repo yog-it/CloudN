@@ -55,10 +55,13 @@
                     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: @_uploadProgress%"></div>
                 </div>
             }
-            if (!string.IsNullOrEmpty(_fileUrl))
+            if (_fileUrl.Count > 0)
             {
                 <h3>Last Uploaded</h3>
-                <div class="card-title text-truncate"><CopyToClipboard Text="@_fileUrl" IconName="clipboard" ClientId="@($"copied{@_fileUrl}")" /></div>
+                @foreach(string url in _fileUrl)
+                {
+                    <div class="card-title text-truncate"><CopyToClipboard Text="@url" IconName="clipboard" ClientId="@($"copied{@url}")" /></div>
+                }
             }
         }
     }
@@ -76,8 +79,9 @@
     private string _inputFileId = Guid.NewGuid().ToString();
     private int _uploadProgress;
     private BlobServiceClient _blobServiceClient;
-    private string _fileUrl;
+    private List<string> _fileUrl = new List<string>();
     private bool _canChangeContainer = false;
+    private long _maxFileSize;
 
     public override List<Resource> Resources => new List<Resource>()
     {
@@ -104,10 +108,14 @@
             {
                 _selectedContainer = SettingService.GetSetting(ModuleState.Settings, "DefaultContainer", "");
             }
+  
             if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "")))
             {
                 _defaultPath = SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "") + '/';
             }
+  
+            long.TryParse(SettingService.GetSetting(ModuleState.Settings, "MaxFileSize", "268435456"), out _maxFileSize);
+  
         }
         catch (Exception ex)
         {
@@ -143,7 +151,8 @@
 
                     BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_selectedContainer);
                     BlobClient blobClient = containerClient.GetBlobClient(_defaultPath + file.Name);
-                    using (var stream = file.OpenReadStream(2147463648))
+  
+                    using (var stream = file.OpenReadStream(_maxFileSize))
                     {
                         var progressHandler = new Progress<long>(progress =>
                         {
@@ -154,11 +163,13 @@
                         {
                             ProgressHandler = progressHandler
                         });
-                        _fileUrl = blobClient.Uri.AbsoluteUri;
+                        _fileUrl.Add(blobClient.Uri.AbsoluteUri);
                     }
+
+                    await logger.LogInformation($"Uploaded File {file.Name} to {blobClient.Uri.AbsoluteUri} ({file.Size:N0}) bytes");
+
                 }
                 _inputFileId = Guid.NewGuid().ToString();
-                await logger.LogInformation("Uploaded File");
                 AddModuleMessage(Localizer["Message.UploadComplete"], MessageType.Success);
             }
             else

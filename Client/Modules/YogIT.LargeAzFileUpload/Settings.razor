@@ -7,6 +7,13 @@
 @inject IStringLocalizer<Settings> Localizer
 
 <div class="container">
+    <div class="row mb-1 align-items-center form-floating">
+        <Label Class="col-sm-3" For="maxFileSize" HelpText="The maximum file size allowed for users to upload" ResourceKey="MaxFileSize">Max File Size: </Label>
+        <div class="col-sm-9">
+            <label for="maxFileSize">@displayMaxFileSize</label>
+            <input id="maxFileSize" type="range" class="form-range w-90" @bind="@_maxFileSize" min="268435456" max="107374182400" step="268435456" />
+        </div>
+    </div>
     <div class="row mb-1 align-items-center">
         <Label Class="col-sm-3" For="storageName" HelpText="Enter the Azure Storage Name" ResourceKey="StorageName">Storage Name: </Label>
         <div class="col-sm-9">
@@ -52,15 +59,25 @@
     string _defaultPath;
     string _defaultContainer;
     bool _allowContainerChange;
+    double _maxFileSize;
+
     List<string> _containers = new List<string>();
     private BlobServiceClient blobServiceClient;
     private bool isContainerListLoaded = false;
+    private string displayMaxFileSize
+    {
+        get
+        {
+            return (_maxFileSize / 1024 / 1024 / 1024).ToString("F2") + "GB";
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
+            double.TryParse(SettingService.GetSetting(settings, "MaxFileSize", "268435456"), out _maxFileSize);
             _storageName = SettingService.GetSetting(settings, "StorageName", "");
             _storageKey = SettingService.GetSetting(settings, "StorageKey", "");
             _defaultContainer = SettingService.GetSetting(settings, "DefaultContainer", "");
@@ -101,6 +118,7 @@
         try
         {
             Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
+            SettingService.SetSetting(settings, "MaxFileSize", _maxFileSize.ToString());
             SettingService.SetSetting(settings, "StorageName", _storageName);
             SettingService.SetSetting(settings, "StorageKey", _storageKey);
             SettingService.SetSetting(settings, "DefaultContainer", _defaultContainer);
@@ -118,5 +136,4 @@
     {
         return Regex.Replace(input, "[^a-zA-Z0-9/]", "", RegexOptions.Compiled).Trim('/');
     }
-
 }

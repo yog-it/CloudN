@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
-    <Version>1.1.1</Version>
+    <Version>1.1.5</Version>
     <Authors>YogIT</Authors>
     <Company>YogIT</Company>
     <Description>Large file uploader for Azure Storage</Description>

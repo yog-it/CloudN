@@ -70,6 +70,7 @@
     private bool validated = false;
     private List<string> _containers = new List<string>();
     private string _selectedContainer;
+    private string _defaultPath = string.Empty;
     private bool _uploading = false;
     private List<IBrowserFile> _files;
     private string _inputFileId = Guid.NewGuid().ToString();
@@ -102,6 +103,10 @@
             if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "DefaultContainer", "")))
             {
                 _selectedContainer = SettingService.GetSetting(ModuleState.Settings, "DefaultContainer", "");
+            }
+            if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "")))
+            {
+                _defaultPath = SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "") + '/';
             }
         }
         catch (Exception ex)
@@ -137,8 +142,7 @@
                 {
 
                     BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_selectedContainer);
-                    BlobClient blobClient = containerClient.GetBlobClient(file.Name);
-
+                    BlobClient blobClient = containerClient.GetBlobClient(_defaultPath + file.Name);
                     using (var stream = file.OpenReadStream(2147463648))
                     {
                         var progressHandler = new Progress<long>(progress =>

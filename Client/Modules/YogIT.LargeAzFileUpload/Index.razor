@@ -73,6 +73,7 @@
     private bool validated = false;
     private List<string> _containers = new List<string>();
     private string _selectedContainer;
+    private string _defaultPath = string.Empty;
     private bool _uploading = false;
     private List<IBrowserFile> _files;
     private string _inputFileId = Guid.NewGuid().ToString();
@@ -107,7 +108,14 @@
             {
                 _selectedContainer = SettingService.GetSetting(ModuleState.Settings, "DefaultContainer", "");
             }
+  
+            if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "")))
+            {
+                _defaultPath = SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "") + '/';
+            }
+  
             long.TryParse(SettingService.GetSetting(ModuleState.Settings, "MaxFileSize", "268435456"), out _maxFileSize);
+  
         }
         catch (Exception ex)
         {
@@ -142,8 +150,8 @@
                 {
 
                     BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_selectedContainer);
-                    BlobClient blobClient = containerClient.GetBlobClient(file.Name);
-
+                    BlobClient blobClient = containerClient.GetBlobClient(_defaultPath + file.Name);
+  
                     using (var stream = file.OpenReadStream(_maxFileSize))
                     {
                         var progressHandler = new Progress<long>(progress =>

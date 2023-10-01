@@ -2,6 +2,7 @@
 @inherits ModuleBase
 @using Azure.Storage.Blobs;
 @using Azure.Storage.Blobs.Models;
+@using System.Text.RegularExpressions;
 @inject ISettingService SettingService
 @inject IStringLocalizer<Settings> Localizer
 
@@ -42,6 +43,12 @@
             </div>
         </div>
     }
+    <div class="row mb-1 align-items-center">
+        <Label Class="col-sm-3" For="defaultPath" HelpText="Enter the default path being uploaded to in the container(s)." ResourceKey="DefaultPath">Default Path: </Label>
+        <div class="col-sm-9">
+            <input id="defaultPath" type="text" class="form-control" @bind="@_defaultPath" />
+        </div>
+    </div>
 </div>
 
 @code {
@@ -49,6 +56,7 @@
 
     string _storageName;
     string _storageKey;
+    string _defaultPath;
     string _defaultContainer;
     bool _allowContainerChange;
     double _maxFileSize;
@@ -74,6 +82,7 @@
             _storageKey = SettingService.GetSetting(settings, "StorageKey", "");
             _defaultContainer = SettingService.GetSetting(settings, "DefaultContainer", "");
             bool.TryParse(SettingService.GetSetting(settings, "AllowContainerChange", ""), out _allowContainerChange);
+            _defaultPath = SettingService.GetSetting(settings, "DefaultPath", "");
             await LoadContainersAsync();
         }
         catch (Exception ex)
@@ -114,6 +123,7 @@
             SettingService.SetSetting(settings, "StorageKey", _storageKey);
             SettingService.SetSetting(settings, "DefaultContainer", _defaultContainer);
             SettingService.SetSetting(settings, "AllowContainerChange", _allowContainerChange.ToString());
+            SettingService.SetSetting(settings, "DefaultPath", AzureSafeBolbPath(_defaultPath));
             await SettingService.UpdateModuleSettingsAsync(settings, ModuleState.ModuleId);
         }
         catch (Exception ex)
@@ -122,4 +132,8 @@
         }
     }
 
+    private string AzureSafeBolbPath(string input)
+    {
+        return Regex.Replace(input, "[^a-zA-Z0-9/]", "", RegexOptions.Compiled).Trim('/');
+    }
 }

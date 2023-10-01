@@ -55,10 +55,13 @@
                     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: @_uploadProgress%"></div>
                 </div>
             }
-            if (!string.IsNullOrEmpty(_fileUrl))
+            if (_fileUrl.Count > 0)
             {
                 <h3>Last Uploaded</h3>
-                <div class="card-title text-truncate"><CopyToClipboard Text="@_fileUrl" IconName="clipboard" ClientId="@($"copied{@_fileUrl}")" /></div>
+                @foreach(string url in _fileUrl)
+                {
+                    <div class="card-title text-truncate"><CopyToClipboard Text="@url" IconName="clipboard" ClientId="@($"copied{@url}")" /></div>
+                }
             }
         }
     }
@@ -75,7 +78,7 @@
     private string _inputFileId = Guid.NewGuid().ToString();
     private int _uploadProgress;
     private BlobServiceClient _blobServiceClient;
-    private string _fileUrl;
+    private List<string> _fileUrl = new List<string>();
     private bool _canChangeContainer = false;
 
     public override List<Resource> Resources => new List<Resource>()
@@ -150,7 +153,7 @@
                         {
                             ProgressHandler = progressHandler
                         });
-                        _fileUrl = blobClient.Uri.AbsoluteUri;
+                        _fileUrl.Add(blobClient.Uri.AbsoluteUri);
                     }
                 }
                 _inputFileId = Guid.NewGuid().ToString();

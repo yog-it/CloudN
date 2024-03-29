@@ -1,6 +1,7 @@
 using Microsoft.JSInterop;
+using System.Threading.Tasks;
 
-namespace YogIT.LargeAzFileUpload
+namespace YogIT.Module.CloudN
 {
     public class Interop
     {

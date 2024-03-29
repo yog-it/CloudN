@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Oqtane.Models;
 
-namespace YogIT.LargeAzFileUpload.Models
+namespace YogIT.Module.CloudN.Models
 {
-    [Table("YogITLargeAzFileUpload")]
-    public class LargeAzFileUpload : IAuditable
+    [Table("YogITCloudN")]
+    public class CloudN : IAuditable
     {
         [Key]
-        public int LargeAzFileUploadId { get; set; }
+        public int CloudNId { get; set; }
         public int ModuleId { get; set; }
         public string Name { get; set; }
 

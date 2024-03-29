@@ -1,12 +1,10 @@
-@using Azure.Storage.Blobs;
-@using Azure.Storage.Blobs.Models;
-@using Oqtane.Modules.Controls
-@using YogIT.LargeAzFileUpload.Shared.Models
-@using YogIT.LargeAzFileUpload.Components
+@using Azure.Storage.Blobs
+@using Azure.Storage.Blobs.Models
 @using Microsoft.AspNetCore.Components.Forms
-@using System.IO;
+@using YogIT.Module.CloudN.Services
+@using YogIT.Module.CloudN.Models
 
-@namespace YogIT.LargeAzFileUpload
+@namespace YogIT.Module.CloudN
 @inherits ModuleBase
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<Index> Localizer
@@ -68,6 +66,8 @@
 </form>
 
 @code {
+    // uncomment the following line to use Static render mode for this component
+    // public override string RenderMode => RenderModes.Static;
 
     private ElementReference form;
     private bool validated = false;
@@ -91,6 +91,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         try
         {
             // get the containers
@@ -108,18 +109,18 @@
             {
                 _selectedContainer = SettingService.GetSetting(ModuleState.Settings, "DefaultContainer", "");
             }
-  
+
             if (!string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "")))
             {
                 _defaultPath = SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "") + '/';
             }
-  
+
             long.TryParse(SettingService.GetSetting(ModuleState.Settings, "MaxFileSize", "268435456"), out _maxFileSize);
-  
+
         }
         catch (Exception ex)
         {
-            await logger.LogError(ex, "Error Loading: {Error}", ex.Message);
+            await logger.LogError(ex, "Error Loading CloudN {Error}", ex.Message);
             AddModuleMessage(Localizer["Message.LoadError"], MessageType.Error);
         }
     }
@@ -151,7 +152,7 @@
 
                     BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_selectedContainer);
                     BlobClient blobClient = containerClient.GetBlobClient(_defaultPath + file.Name);
-  
+
                     using (var stream = file.OpenReadStream(_maxFileSize))
                     {
                         var progressHandler = new Progress<long>(progress =>
@@ -160,9 +161,9 @@
                             StateHasChanged();
                         });
                         await blobClient.UploadAsync(stream, new Azure.Storage.Blobs.Models.BlobUploadOptions
-                        {
-                            ProgressHandler = progressHandler
-                        });
+                            {
+                                ProgressHandler = progressHandler
+                            });
                         _fileUrl.Add(blobClient.Uri.AbsoluteUri);
                     }
 

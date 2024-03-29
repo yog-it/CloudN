@@ -1,7 +1,7 @@
 /* Module Script */
 var YogIT = YogIT || {};
 
-YogIT.LargeAzFileUpload = {
+YogIT.CloudN = {
     copyText: function (text, copiedid) {
         navigator.clipboard.writeText(text).then(function () {
             var copied = document.getElementById(copiedid);

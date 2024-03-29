@@ -1,5 +1,6 @@
 {
   "Title": "Default Module Template",
   "Type": "External",
-  "Version": "3.3.0"
+  "Version": "5.1.0",
+  "Namespace": "YogIT.Module.CloudN"
 }

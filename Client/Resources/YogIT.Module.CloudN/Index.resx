@@ -126,7 +126,7 @@
   <data name="Message.ConfigureModule" xml:space="preserve">
     <value>Please configure the module using the Module Settings option when in Page Edit mode.</value>
   </data>
-  <data name="Message.LoadError" xml:space="preserve">
+  <data name="Message.LoadError1" xml:space="preserve">
     <value>Error Loading LargeAzFileUpload</value>
   </data>
   <data name="Message.UploadComplete" xml:space="preserve">

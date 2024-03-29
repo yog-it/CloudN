@@ -1,3 +1,4 @@
+using System.Resources;
 using Microsoft.Extensions.Localization;
 
-[assembly: RootNamespace("YogIT.LargeAzFileUpload.Client")]
+[assembly: RootNamespace("YogIT.Module.CloudN.Client")]

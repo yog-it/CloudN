@@ -1,8 +1,9 @@
-@namespace YogIT.LargeAzFileUpload
-@inherits ModuleBase
 @using Azure.Storage.Blobs;
 @using Azure.Storage.Blobs.Models;
 @using System.Text.RegularExpressions;
+
+@namespace YogIT.Module.CloudN
+@inherits ModuleBase
 @inject ISettingService SettingService
 @inject IStringLocalizer<Settings> Localizer
 
@@ -52,7 +53,8 @@
 </div>
 
 @code {
-    public override string Title => "LargeAzFileUpload Settings";
+    private string resourceType = "YogIT.Module.CloudN.Settings, YogIT.Module.CloudN.Client.Oqtane"; // for localization
+    public override string Title => "CloudN Settings";
 
     string _storageName;
     string _storageKey;
@@ -87,7 +89,7 @@
         }
         catch (Exception ex)
         {
-            ModuleInstance.AddModuleMessage(ex.Message, MessageType.Error);
+            AddModuleMessage(ex.Message, MessageType.Error);
         }
     }
 
@@ -128,7 +130,7 @@
         }
         catch (Exception ex)
         {
-            ModuleInstance.AddModuleMessage(ex.Message, MessageType.Error);
+            AddModuleMessage(ex.Message, MessageType.Error);
         }
     }
 

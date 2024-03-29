@@ -53,7 +53,7 @@ namespace YogIT.Module.CloudN.Manager
             {
                 foreach(var CloudN in CloudNs)
                 {
-                    _CloudNRepository.AddCloudN(new Models.CloudN { ModuleId = module.ModuleId, Name = CloudN.Name });
+                    _CloudNRepository.AddCloudN(new Models.CloudN { ModuleId = module.ModuleId, FileName = CloudN.FileName, ContentType = CloudN.ContentType, Url = CloudN.Url });
                 }
             }
         }

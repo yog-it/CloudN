@@ -24,13 +24,17 @@ namespace YogIT.Module.CloudN.Migrations.EntityBuilders
         {
             CloudNId = AddAutoIncrementColumn(table,"CloudNId");
             ModuleId = AddIntegerColumn(table,"ModuleId");
-            Name = AddMaxStringColumn(table,"Name");
+            FileName = AddStringColumn(table,"FileName", 255);
+            ContentType = AddStringColumn(table, "ContentType", 255);
+            Url = AddStringColumn(table,"Url", 500);
             AddAuditableColumns(table);
             return this;
         }
 
         public OperationBuilder<AddColumnOperation> CloudNId { get; set; }
         public OperationBuilder<AddColumnOperation> ModuleId { get; set; }
-        public OperationBuilder<AddColumnOperation> Name { get; set; }
+        public OperationBuilder<AddColumnOperation> FileName { get; set; }
+        public OperationBuilder<AddColumnOperation> ContentType { get; set; }
+        public OperationBuilder<AddColumnOperation> Url { get; set; }
     }
 }

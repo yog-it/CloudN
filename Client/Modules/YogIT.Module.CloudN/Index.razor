@@ -3,12 +3,14 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using YogIT.Module.CloudN.Services
 @using YogIT.Module.CloudN.Models
+@using YogIT.Module.CloudN.Components
 
 @namespace YogIT.Module.CloudN
 @inherits ModuleBase
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<Index> Localizer
 @inject ISettingService SettingService
+@inject ICloudNService CloudNService
 
 <form @ref="form" class="@(validated ? " was-validated" : "needs-validation" )" novalidate>
     @if (string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "StorageName", "")))
@@ -167,7 +169,17 @@
                         _fileUrl.Add(blobClient.Uri.AbsoluteUri);
                     }
 
-                    await logger.LogInformation($"Uploaded File {file.Name} to {blobClient.Uri.AbsoluteUri} ({file.Size:N0}) bytes");
+
+                    var cloudN = new CloudN
+                    {
+                        FileName = file.Name,
+                        ContentType = file.ContentType,
+                        Url = blobClient.Uri.AbsoluteUri
+                    };
+
+                    cloudN = await CloudNService.AddCloudNAsync(cloudN);
+                    var logString = $"CloudN Uploaded File {file.Name} to {blobClient.Uri.AbsoluteUri} ({file.Size:N0}) bytes.";
+                    await logger.LogInformation("CloudN Added {CloudN} - " + logString, cloudN);
 
                 }
                 _inputFileId = Guid.NewGuid().ToString();

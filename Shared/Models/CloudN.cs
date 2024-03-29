@@ -11,7 +11,9 @@ namespace YogIT.Module.CloudN.Models
         [Key]
         public int CloudNId { get; set; }
         public int ModuleId { get; set; }
-        public string Name { get; set; }
+        public string FileName { get; set; }
+        public string ContentType { get; set; }
+        public string Url { get; set; }
 
         public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }

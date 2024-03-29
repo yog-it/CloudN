@@ -1,7 +1,7 @@
 /* Module Script */
-var YogIT = YogIT || {};
+var CloudN = CloudN || {};
 
-YogIT.CloudN = {
+CloudN = {
     copyText: function (text, copiedid) {
         navigator.clipboard.writeText(text).then(function () {
             var copied = document.getElementById(copiedid);

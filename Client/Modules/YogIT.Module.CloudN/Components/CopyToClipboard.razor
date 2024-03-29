@@ -51,6 +51,6 @@
 
     private async Task CopyTextToClipboard()
     {
-        await JSRuntime.InvokeVoidAsync("YogIT.CloudN.copyText", Text, ClientId);
+        await JSRuntime.InvokeVoidAsync("CloudN.copyText", Text, ClientId);
     }
 }

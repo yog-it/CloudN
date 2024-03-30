@@ -151,35 +151,43 @@
             {
                 foreach (var file in _files)
                 {
-
                     BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_selectedContainer);
                     BlobClient blobClient = containerClient.GetBlobClient(_defaultPath + file.Name);
 
-                    using (var stream = file.OpenReadStream(_maxFileSize))
+                    var cloudN = new CloudN 
                     {
-                        var progressHandler = new Progress<long>(progress =>
-                        {
-                            _uploadProgress = (int)((progress * 100) / stream.Length);
-                            StateHasChanged();
-                        });
-                        await blobClient.UploadAsync(stream, new Azure.Storage.Blobs.Models.BlobUploadOptions
-                            {
-                                ProgressHandler = progressHandler
-                            });
-                        _fileUrl.Add(blobClient.Uri.AbsoluteUri);
-                    }
-
-
-                    var cloudN = new CloudN
-                    {
+                        ModuleId = ModuleState.ModuleId,
                         FileName = file.Name,
                         ContentType = file.ContentType,
                         Url = blobClient.Uri.AbsoluteUri
                     };
 
                     cloudN = await CloudNService.AddCloudNAsync(cloudN);
-                    var logString = $"CloudN Uploaded File {file.Name} to {blobClient.Uri.AbsoluteUri} ({file.Size:N0}) bytes.";
-                    await logger.LogInformation("CloudN Added {CloudN} - " + logString, cloudN);
+
+                    if (cloudN != null)
+                    {
+                        using (var stream = file.OpenReadStream(_maxFileSize))
+                        {
+                            var progressHandler = new Progress<long>(progress =>
+                            {
+                                _uploadProgress = (int)((progress * 100) / stream.Length);
+                                StateHasChanged();
+                            });
+                            await blobClient.UploadAsync(stream, new Azure.Storage.Blobs.Models.BlobUploadOptions
+                                {
+                                    ProgressHandler = progressHandler
+                                });
+                            _fileUrl.Add(blobClient.Uri.AbsoluteUri);
+                        }
+
+                        await logger.LogInformation("CloudN Added {File} ({Size}) ", blobClient.Uri.AbsoluteUri, file.Size);
+                    }
+                    else
+                    {
+                        AddModuleMessage(Localizer["Message.UploadError"], MessageType.Error);
+                        _uploading = false;
+                        return;
+                    }
 
                 }
                 _inputFileId = Guid.NewGuid().ToString();

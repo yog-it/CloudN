@@ -57,7 +57,7 @@ namespace YogIT.Module.CloudN.Services
 
         public async Task<Models.CloudN> AddCloudNAsync(Models.CloudN CloudN)
         {
-            if (_userPermissions.IsAuthorized(_accessor.HttpContext.User, _alias.SiteId, EntityNames.Module, CloudN.ModuleId, PermissionNames.Edit))
+            if (_userPermissions.IsAuthorized(_accessor.HttpContext.User, _alias.SiteId, EntityNames.Module, CloudN.ModuleId, PermissionNames.View))
             {
                 CloudN = await _CloudNRepository.AddCloudNAsync(CloudN);
                 _logger.Log(LogLevel.Information, this, LogFunction.Create, "CloudN Added {CloudN}", CloudN);

@@ -2,12 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>YogIT.Module.CloudN</id>
-    <version>1.0.0</version>
-    <authors>YogIT</authors>
-    <owners>YogIT</owners>
+    <version>1.2.0</version>
+    <authors>Yog-IT</authors>
+    <owners>Yog-IT</owners>
     <title>CloudN</title>
     <description>A file upload tool for cloud storage</description>
-    <copyright>YogIT</copyright>
+    <copyright>Yog-IT 2024</copyright>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/oqtane/oqtane.framework</projectUrl>

@@ -3,12 +3,14 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using YogIT.Module.CloudN.Services
 @using YogIT.Module.CloudN.Models
+@using YogIT.Module.CloudN.Components
 
 @namespace YogIT.Module.CloudN
 @inherits ModuleBase
 @inject NavigationManager NavigationManager
 @inject IStringLocalizer<Index> Localizer
 @inject ISettingService SettingService
+@inject ICloudNService CloudNService
 
 <form @ref="form" class="@(validated ? " was-validated" : "needs-validation" )" novalidate>
     @if (string.IsNullOrEmpty(SettingService.GetSetting(ModuleState.Settings, "StorageName", "")))
@@ -115,7 +117,7 @@
                 _defaultPath = SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "") + '/';
             }
 
-            long.TryParse(SettingService.GetSetting(ModuleState.Settings, "MaxFileSize", "268435456"), out _maxFileSize);
+            long.TryParse(SettingService.GetSetting(ModuleState.Settings, "MaxFileSize", "1073741824"), out _maxFileSize);
 
         }
         catch (Exception ex)
@@ -149,25 +151,43 @@
             {
                 foreach (var file in _files)
                 {
-
                     BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_selectedContainer);
                     BlobClient blobClient = containerClient.GetBlobClient(_defaultPath + file.Name);
 
-                    using (var stream = file.OpenReadStream(_maxFileSize))
+                    var cloudN = new CloudN 
                     {
-                        var progressHandler = new Progress<long>(progress =>
-                        {
-                            _uploadProgress = (int)((progress * 100) / stream.Length);
-                            StateHasChanged();
-                        });
-                        await blobClient.UploadAsync(stream, new Azure.Storage.Blobs.Models.BlobUploadOptions
-                            {
-                                ProgressHandler = progressHandler
-                            });
-                        _fileUrl.Add(blobClient.Uri.AbsoluteUri);
-                    }
+                        ModuleId = ModuleState.ModuleId,
+                        FileName = file.Name,
+                        ContentType = file.ContentType,
+                        Url = blobClient.Uri.AbsoluteUri
+                    };
 
-                    await logger.LogInformation($"Uploaded File {file.Name} to {blobClient.Uri.AbsoluteUri} ({file.Size:N0}) bytes");
+                    cloudN = await CloudNService.AddCloudNAsync(cloudN);
+
+                    if (cloudN != null)
+                    {
+                        using (var stream = file.OpenReadStream(_maxFileSize))
+                        {
+                            var progressHandler = new Progress<long>(progress =>
+                            {
+                                _uploadProgress = (int)((progress * 100) / stream.Length);
+                                StateHasChanged();
+                            });
+                            await blobClient.UploadAsync(stream, new Azure.Storage.Blobs.Models.BlobUploadOptions
+                                {
+                                    ProgressHandler = progressHandler
+                                });
+                            _fileUrl.Add(blobClient.Uri.AbsoluteUri);
+                        }
+
+                        await logger.LogInformation("CloudN Added {File} ({Size}) ", blobClient.Uri.AbsoluteUri, file.Size);
+                    }
+                    else
+                    {
+                        AddModuleMessage(Localizer["Message.UploadError"], MessageType.Error);
+                        _uploading = false;
+                        return;
+                    }
 
                 }
                 _inputFileId = Guid.NewGuid().ToString();

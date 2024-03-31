@@ -59,7 +59,7 @@ namespace YogIT.Module.CloudN.Controllers
 
         // POST api/<controller>
         [HttpPost]
-        [Authorize(Policy = PolicyNames.EditModule)]
+        [Authorize(Policy = PolicyNames.ViewModule)]
         public Models.CloudN Post([FromBody] Models.CloudN CloudN)
         {
             if (ModelState.IsValid && IsAuthorizedEntityId(EntityNames.Module, CloudN.ModuleId))

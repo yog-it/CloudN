@@ -117,7 +117,7 @@
                 _defaultPath = SettingService.GetSetting(ModuleState.Settings, "DefaultPath", "") + '/';
             }
 
-            long.TryParse(SettingService.GetSetting(ModuleState.Settings, "MaxFileSize", "268435456"), out _maxFileSize);
+            long.TryParse(SettingService.GetSetting(ModuleState.Settings, "MaxFileSize", "1073741824"), out _maxFileSize);
 
         }
         catch (Exception ex)

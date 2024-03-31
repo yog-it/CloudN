@@ -12,7 +12,21 @@
         <Label Class="col-sm-3" For="maxFileSize" HelpText="The maximum file size allowed for users to upload" ResourceKey="MaxFileSize">Max File Size: </Label>
         <div class="col-sm-9">
             <label for="maxFileSize">@displayMaxFileSize</label>
-            <input id="maxFileSize" type="range" class="form-range w-90" @bind="@_maxFileSize" min="268435456" max="107374182400" step="268435456" />
+            <input id="maxFileSize" type="range" class="form-range w-90" @bind="@_maxFileSize" @bind:event="oninput" min="1073741824" max="1099511627776" step="1073741824" />
+            <div class="row">
+                <div class="col text-start">
+                    <label>|</label><br />
+                    <label>1GB</label>
+                </div>
+                <div class="col text-center">
+                    <label>|</label><br />
+                    <label>512GB</label>
+                </div>
+                <div class="col text-end">
+                    <label>|</label><br />
+                    <label>1TB</label>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row mb-1 align-items-center">
@@ -66,11 +80,12 @@
     List<string> _containers = new List<string>();
     private BlobServiceClient blobServiceClient;
     private bool isContainerListLoaded = false;
+
     private string displayMaxFileSize
     {
         get
         {
-            return (_maxFileSize / 1024 / 1024 / 1024).ToString("F2") + "GB";
+            return (_maxFileSize / 1024 / 1024 / 1024).ToString("F0") + "GB";
         }
     }
 
@@ -79,7 +94,7 @@
         try
         {
             Dictionary<string, string> settings = await SettingService.GetModuleSettingsAsync(ModuleState.ModuleId);
-            double.TryParse(SettingService.GetSetting(settings, "MaxFileSize", "268435456"), out _maxFileSize);
+            double.TryParse(SettingService.GetSetting(settings, "MaxFileSize", "1073741824"), out _maxFileSize);
             _storageName = SettingService.GetSetting(settings, "StorageName", "");
             _storageKey = SettingService.GetSetting(settings, "StorageKey", "");
             _defaultContainer = SettingService.GetSetting(settings, "DefaultContainer", "");
